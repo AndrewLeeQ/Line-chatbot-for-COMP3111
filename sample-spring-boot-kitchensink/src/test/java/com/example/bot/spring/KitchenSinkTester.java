@@ -74,4 +74,30 @@ public class KitchenSinkTester {
 		assertThat(!thrown);
 		assertThat(result.equals("def"));
 	}
+
+	@Test
+	public void testMatch1() throws Exception {
+		boolean thrown = false;
+		String result = null;
+		try {
+			result = this.databaseEngine.search("Do you know what comes after abc?");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		assertThat(!thrown);
+		assertThat(result.equals("def"));
+	}
+	
+	@Test
+	public void testMatch2() throws Exception {
+		boolean thrown = false;
+		String result = null;
+		try {
+			result = this.databaseEngine.search("I am not fine i am fine");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		assertThat(!thrown);
+		assertThat(result.equals("Great!"));
+	}	
 }
