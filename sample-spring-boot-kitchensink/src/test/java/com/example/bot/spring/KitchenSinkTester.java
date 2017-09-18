@@ -102,25 +102,27 @@ public class KitchenSinkTester {
 		assertThat(result.equals("Great!"));
 	}	
     
-    @Test
+    
+    @Test 
     public void testMatch3() throws Exception {
         boolean thrown = false;
 		String result = null;
 		try {
-			result = this.databaseEngine.search("def");
+			result = this.databaseEngine.search("I am fine");
 		} catch (Exception e) {
 			thrown = true;
 		}
 		assertThat(!thrown);
-		assertThat(result.equals("def"));
+		assertThat(result.equals("Great!"));
     }
     
     @Test 
     public void testMatch4() throws Exception {
+        
         boolean thrown = false;
 		String result = null;
 		try {
-			result = this.databaseEngine.search("I am fine");
+			result = this.databaseEngine.search("Who say I am fine?");
 		} catch (Exception e) {
 			thrown = true;
 		}
@@ -134,11 +136,10 @@ public class KitchenSinkTester {
         boolean thrown = false;
 		String result = null;
 		try {
-			result = this.databaseEngine.search("Who say I am fine?");
+			result = this.databaseEngine.search("def");
 		} catch (Exception e) {
 			thrown = true;
 		}
-		assertThat(!thrown);
-		assertThat(result.equals("Great!"));
+		assertThat(thrown);
     }
 }
