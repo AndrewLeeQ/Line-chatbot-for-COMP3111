@@ -27,9 +27,10 @@ public class SQLDatabaseEngine extends DatabaseEngine {
 				String response = rs.getString(2);
 				int hits = rs.getInt(3);
 				if(text.toLowerCase().contains(keyword.toLowerCase())) {
-					result = response + " " + Integer.toString(hits);
+					result = response + " " + Integer.toString(hits + 1);
 					updateHit.setInt(1, hits + 1);
 					updateHit.setString(2, keyword);
+					updateHit.executeQuery();
 					break;
 				}
 			}

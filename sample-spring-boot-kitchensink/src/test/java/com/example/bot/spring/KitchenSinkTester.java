@@ -132,8 +132,7 @@ public class KitchenSinkTester {
     }
     
     @Test 
-    public void testMatch5() throws Exception {
-        
+    public void testMatch5() throws Exception {        
         boolean thrown = false;
 		String result = null;
 		try {
@@ -142,5 +141,25 @@ public class KitchenSinkTester {
 			thrown = true;
 		}
 		assertThat(thrown);
+    }
+    
+    @Test
+    public void testCounter() throws Exception {
+    	boolean thrown = false;
+		String result = null;
+		int before = -1;
+		try {
+			result = this.databaseEngine.search("abc");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		assertThat(!thrown);
+		before = Integer.parseInt(result.split(" ")[1]);
+		try {
+			result = this.databaseEngine.search("abc");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		assertThat(before + 1 == Integer.parseInt(result.split(" ")[1]));
     }
 }
