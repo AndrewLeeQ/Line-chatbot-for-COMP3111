@@ -11,10 +11,40 @@ import java.net.URI;
 public class SQLDatabaseEngine extends DatabaseEngine {
 	@Override
 	String search(String text) throws Exception {
-		//Write your code here
-		return null;
-	}
-	
+		String result = null;
+		try {
+			Connection connection = getConnection();
+			PreparedStatement statement = connection.prepareStatement(
+						"SELECT * FROM responses;");			
+			
+			PreparedStatement updateHit = connection.prepareStatement(
+						"UPDATE responses SET hits = ? WHERE keyword = ?");
+						
+			ResultSet rs = statement.executeQuery();
+			
+			while(rs.next()) {
+				String keyword = rs.getString(1);
+				String response = rs.getString(2);
+				int hits = rs.getInt(3);
+				if(text.toLowerCase().contains(keyword.toLowerCase())) {
+					result = response + " " + Integer.toString(hits);
+					updateHit.setInt(1, hits + 1);
+					updateHit.setString(2, keyword);
+					break;
+				}
+			}
+			
+			rs.close();
+			statement.close();
+			connection.close();
+		}
+		catch(Exception e) {
+			log.info("Exception while querying the database: {}", e.toString());
+		}
+		if(result != null)
+			return result;
+		throw new Exception("Not found");
+	}	
 	
 	private Connection getConnection() throws URISyntaxException, SQLException {
 		Connection connection;
