@@ -48,7 +48,13 @@ public class Test {
 				case "2":
 					System.out.println(MESSAGE_SELECT_TWO);
 					String order = br.readLine();
-					// TODO: act appropriately according to your design
+					try {
+						Integer.parseInt(order);
+					}
+					catch(NumberFormatException e) {
+						System.out.println(MESSAGE_ERROR);
+						break;
+					}
 					starbucks.setMessage(order);
 					break;
 				case "3":

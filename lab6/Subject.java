@@ -2,6 +2,7 @@ package skeleton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observer;
 
 public class Subject {
 	private List<Observer> observers;
@@ -23,7 +24,9 @@ public class Subject {
 	}
 
 	public void notifyObservers() {
-		// TODO: notify every observers
+		for(Observer obs: observers) {
+			obs.update(Integer.parseInt(this.getMessage()));
+		}
 	}
 
 	public void setMessage(String msg) {

@@ -20,9 +20,12 @@ public class Observer {
 		subject.unregister(this);
 	}
 	
-	public void update(){
+	public void update(int newId){
 		// TODO: The observer will exit the queue 
 		// once the notification has value >= this.id+7.
 		// Don't forget they will leave if it is their number too.
+		if(newId >= this.id + 7 || newId == this.id) {
+			this.unsubscribe();
+		}
 	}
 }
