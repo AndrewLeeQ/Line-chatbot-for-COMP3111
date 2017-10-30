@@ -73,82 +73,68 @@ class Transcript {
      * @param width The preferred width for each line, although this may not be respected if an
      *              individual field is too long.
      */
-    public void generateTranscriptForWidth(int width) {
+    
+    void appendAlignCharacters(StringBuilder target, int width, String character) {
+    	for(int i = 0; i < width; i++)
+    		target.append(character);
+    }
+    
+    void appendAlignedString(StringBuilder target, int width, String content, String alignCharacter) {
+    	int spacesBefore = (width - content.length()) / 2;
+    	int spacesAfter = (width - content.length() + 1) / 2;
+        appendAlignCharacters(target, spacesBefore, alignCharacter);
+        target.append(content);
+        appendAlignCharacters(target, spacesAfter, alignCharacter);
+        target.append("\n");    	
+    }
+    
+    int appendStringToClassResult(StringBuilder target, String content, int width, int currentLength, int indentWidth, String indentString) {
+    	if(currentLength + 1 + content.length() > width) {
+    		target.append("\n");
+    		for(int i = 0; i < indentWidth; i++)
+    			target.append(indentString);
+    		currentLength = 2;
+    	}
+    	else {
+    		target.append(" ");
+    		currentLength++;
+    	}
+    	target.append(content);
+    	currentLength += content.length();
+    	return currentLength;
+    }
+    
+    void appendClassResult(StringBuilder target, ClassResult result, int width, int indentWidth, String indentString) {
+    	int currentLength = result.classCode().length();
+    	target.append(result.classCode());
+    	
+    	currentLength = appendStringToClassResult(target, result.className(), width, currentLength, indentWidth, indentString);
+    	currentLength = appendStringToClassResult(target, String.format("%.2f", result.gradePoints()), width, currentLength, indentWidth, indentString);
+    	currentLength = appendStringToClassResult(target, String.format("%d", result.credits()), width, currentLength, indentWidth, indentString);
+    	
+        target.append("\n");
+    }
+    
+    public int generateTranscriptForWidth(int width, boolean output) {
         StringBuilder transcriptBuilder = new StringBuilder();
-
-        // By finding the remaining half of the spaces, we center align the text.
-        int spacesBeforeName = (width - studentName.length()) / 2;
-        for (int i = 0; i < spacesBeforeName; ++i) {
-            transcriptBuilder.append(" ");
-        }
-        transcriptBuilder.append(studentName);
-        transcriptBuilder.append("\n");
-
-        int spacesBeforeId = (width - studentId.length()) / 2;
-        for (int i = 0; i < spacesBeforeId; ++i) {
-            transcriptBuilder.append(" ");
-        }
-        transcriptBuilder.append(studentId);
-        transcriptBuilder.append("\n");
-
-        int spacesBeforeSemester = (width - semesterName.length()) / 2;
-        for (int i = 0; i < spacesBeforeSemester; ++i) {
-            transcriptBuilder.append(" ");
-        }
-        transcriptBuilder.append(semesterName);
-        transcriptBuilder.append("\n");
-
+        
+        String alignCharacter = "-";
+        
+        appendAlignedString(transcriptBuilder, width, studentName, alignCharacter);
+        appendAlignedString(transcriptBuilder, width, studentId, alignCharacter);
+        appendAlignedString(transcriptBuilder, width, semesterName, alignCharacter);
+        
         // Newline between header and transcript body.
         transcriptBuilder.append("\n");
-
+        
         double totalGradePoints = 0.0;
         int totalCredits = 0;
         for (ClassResult result : classResults) {
             // Accumulate the total grade points for later display.
             totalGradePoints += result.gradePoints() * result.credits();
             totalCredits += result.credits();
-
-            int currentLength = result.classCode().length();
-            transcriptBuilder.append(result.classCode());
-
-            // We add 1 to account for the space between the two fields, if on the same line.
-            if (currentLength + 1 + result.className().length() > width) {
-                // The current length is 4 because of the spaces added for indentation.
-                transcriptBuilder.append("\n    ");
-                currentLength = 4;
-            } else {
-                transcriptBuilder.append(" ");
-                currentLength++;
-            }
             
-            transcriptBuilder.append(result.className());
-            currentLength += result.className().length();
-
-            String gradePointsString = String.format("%.2f", result.gradePoints());
-            if (currentLength + 1 + gradePointsString.length() > width) {
-                transcriptBuilder.append("\n    ");
-                currentLength = 4;
-            } else {
-                transcriptBuilder.append(" ");
-                currentLength++;
-            }
-            
-            transcriptBuilder.append(gradePointsString);
-            currentLength += gradePointsString.length();
-
-            String creditsString = String.format("%d", result.credits());
-            if (currentLength + 1 + creditsString.length() > width) {
-                transcriptBuilder.append("\n    ");
-                currentLength = 4;
-            } else {
-                transcriptBuilder.append(" ");
-                currentLength++;
-            }
-            
-            transcriptBuilder.append(creditsString);
-            currentLength += creditsString.length();
-
-            transcriptBuilder.append("\n");
+            appendClassResult(transcriptBuilder, result, width, 2, " ");
         }
         
         // Newline between the transcript and the summary.
@@ -156,8 +142,16 @@ class Transcript {
 
         transcriptBuilder.append(
                 String.format("Semester GPA: %.2f", totalGradePoints / totalCredits));
-
-        System.out.println(transcriptBuilder.toString());
+        
+        String transcript = transcriptBuilder.toString();
+        if(output)
+        	System.out.println(transcript);
+        int lineCount = 0;
+        for(int i = 0; i < transcript.length(); i++) {
+        	if(transcript.charAt(i) == '\n')
+        		lineCount++;
+        }
+        return lineCount + 1;
     }
 
     /**
@@ -170,49 +164,7 @@ class Transcript {
      *         {@code width} argument.
      */
     public int transcriptHeightForWidth(int width) {
-        // The header consists of studentName, studentId, semesterName, and separating newline.
-        int totalLines = 4;
-        
-        for (ClassResult result : classResults) {
-            int currentLength = result.classCode().length();
-            if (currentLength + 1 + result.className().length() > width) {
-                totalLines++;
-
-                // The current length is 4 after a newline is emitted to account for the
-                // indentation on the new line.
-                currentLength = 4;
-            } else {
-                currentLength++;
-            }
-            
-            currentLength += result.className().length();
-
-            String gradePointsString = String.format("%.2f", result.gradePoints());
-            if (currentLength + 1 + gradePointsString.length() > width) {
-                totalLines++;
-                currentLength = 4;
-            } else {
-                currentLength++;
-            }
-            
-            currentLength += gradePointsString.length();
-
-            String creditsString = String.format("%d", result.credits());
-            if (currentLength + 1 + creditsString.length() > width) {
-                totalLines++;
-                currentLength = 4;
-            } else {
-                currentLength++;
-            }
-
-            currentLength += creditsString.length();
-            totalLines++;
-        }
-        
-        // The footer consists of the line separating the transcript body and the line indicating
-        // the semester GPA.
-        totalLines += 2;
-        return totalLines;
+    	return generateTranscriptForWidth(width, false);
     }
 }
 
@@ -223,7 +175,7 @@ public class RefactoringLab {
             new ClassResult("COMP3311", "Database Management Systems", 3.3, 3),
         };
         Transcript transcript = new Transcript("John Chan", "21039408", "2017F", classResults);
-        transcript.generateTranscriptForWidth(20);
+        transcript.generateTranscriptForWidth(20, true);
         System.out.println("Total lines: " + transcript.transcriptHeightForWidth(20));
     }
 }
